@@ -1,0 +1,15 @@
+<!docTYPE html>
+<html lang="en">
+  <head>
+    
+  </head>
+  <body>
+    <h1>About</h1>
+    <p>This is the about page. </p>
+    {% for dtat in sddata %}
+      <p>
+        {{dtat['username']}}
+      </p>
+    {% endfor%}
+  </body>
+</html>
