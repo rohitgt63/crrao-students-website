@@ -9,6 +9,7 @@ packages = [{include = "repl_nix_crrao_students_website"}]
 [tool.poetry.dependencies]
 python = "^3.10"
 flask = "^3.0.3"
+firebase-admin = "^6.5.0"
 
 
 [build-system]

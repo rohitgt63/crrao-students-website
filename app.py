@@ -1,7 +1,20 @@
-from flask import Flask, render_template , request, redirect, url_for
+from flask import Flask, render_template , request, redirect, session, url_for
+
+import firebase_admin
+from firebase_admin import credentials, db 
+
 
 
 app = Flask(__name__, template_folder='template')
+
+
+
+cred = credentials.Certificate('template/jason-file.json')
+firebase_admin.initialize_app(cred, {
+    'databaseURL': 'https://students-portal-cef49-default-rtdb.asia-southeast1.firebasedatabase.app'
+})
+
+
 
 
 @app.route('/')
@@ -135,18 +148,35 @@ users = [
 
 @app.route('/logged.html', methods=['POST'])
 def do_login():
+    ID = request.form['ID']
     username = request.form['username']
     password = request.form['password']
-    for user in users:
-        if username == user['username'] and password == user['password']:
-            return redirect(url_for('logged', user_id=user['id'], att = user['attendance']))
-    return 'Invalid credentials, please try again.'
-
-
-@app.route('/logged.html/<int:user_id>')
-def logged(user_id):
+    ref = db.reference(f'student2/{ID}/username')
+    student = ref.get()
+    rep = db.reference(f'student2/{ID}/pass')
+    pas = rep.get()
     
-    return render_template('logged.html',data = users, id_1= user_id , att_1 = users[user_id-1]['attendance'], name_1 = users[user_id-1]['name'], username_1 = users[user_id-1]['username'] , password_1 = users[user_id-1]['password'], cgpa_1 = users[user_id-1]['cgpa'] )
+    
+    print(pas)
+    print(password)
+    print(username)
+    print(student)
+    
+    if username == student and password == pas:
+        
+            return redirect(url_for('logged')  +  f"?ID={ID}" )
+    else:
+        return 'Invalid credentials, please try again.'
+
+    
+
+
+@app.route('/logged.html/student2/' )
+def logged():
+    
+    ID = request.args.get('ID')
+    return render_template('logged.html' , name_1 = db.reference(f'student2/{ID}/name').get() , username_1 = db.reference(f'student2/{ID}/username').get() , cgpa_1 = db.reference(f'student2/{ID}/1 SEM (CGPA)').get() , att_1 = db.reference(f'student2/{ID}/ATTENDANCE').get())
+    
 
 
 
@@ -160,12 +190,25 @@ def logged(user_id):
 def students():
     return render_template('students.html')
 
+@app.route('/student.html')
+def student():
+    return render_template('student.html')
 
-@app.route('/about.html')
+
+@app.route('/about.html/')
 def about():
-    return render_template('about.html',
-                           sddata=students_data )
-
+    ref = db.reference('student2/1/ID')
+    student = ref.get()
+    
+    
+    return render_template('about.html',   st = student)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)
+
+
+
+
+
+
+
